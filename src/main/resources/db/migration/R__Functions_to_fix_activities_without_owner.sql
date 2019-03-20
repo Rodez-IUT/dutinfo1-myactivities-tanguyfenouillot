@@ -8,11 +8,11 @@ CREATE OR REPLACE FUNCTION get_default_owner() RETURNS "user" AS $$
 DECLARE
 
   defaultOwner "user"%rowtype;
-  defautlOwnerUsername varchar(50) := 'Default Owner';
+  defaultOwnerUsername varchar(50) := 'Default Owner';
   
 BEGIN
 
-  SELECT *
+  SELECT * INTO defaultOwner
   FROM "user"
   WHERE username = defaultOwnerUsername;
 
@@ -27,11 +27,24 @@ BEGIN
 END
   
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fix_activities_without_owner() RETURNS SETOF activity AS $$
+
+DECLARE
   
---  SELECT *
---  FROM "user"
---  WHERE username IS NULL*/
+  defaultOwner "user"%rowtype;
+  nowDate date = now();
 
---CREATE OR REPLACE FUNCTION fix_activities_without_owner() RETURNS SETOF activity AS $$
+BEGIN
+  
+  defaultOwner := get_default_owner();
+  RETURN QUERY
+  UPDATE activity
+  SET owner_id = defaultOwner.id,
+      modification_date = nowDate
+      WHERE owner_id IS NULL
+      RETURNING *;
 
---$$ LANGUAGE plpgSQL;
+END
+
+$$ LANGUAGE plpgSQL;
