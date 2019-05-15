@@ -1,4 +1,4 @@
-DROP TRIGGER IF EXISTS action_log on activity;
+DROP TRIGGER IF EXISTS log_delete_activity on activity;
 DROP TRIGGER IF EXISTS log_insert_registration on registration;
 DROP TRIGGER IF EXISTS log_delete_registration on registration; 
 
@@ -27,7 +27,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE TRIGGER action_log
+CREATE TRIGGER log_delete_activity
 	AFTER DELETE ON activity
 	FOR EACH ROW EXECUTE PROCEDURE log_delete_registration();
 	
